@@ -1,7 +1,9 @@
 package com.example.GestorFinanzas.Ingresos.Delete.App;
 
 import com.example.GestorFinanzas.Ingresos.Delete.Domain.Services.DeleteIngresoService;
+import org.springframework.stereotype.Service;
 
+@Service
 public class DeleteIngreso {
 
     private final DeleteIngresoService service;
