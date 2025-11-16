@@ -1,42 +1,212 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Gestor de Finanzas - Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .dashboard-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: none;
+    }
+    .saldo-total {
+      font-size: 2.5rem;
+      font-weight: bold;
+    }
+    .saldo-positivo { color: #2ecc71; }
+    .saldo-negativo { color: #e74c3c; }
+    .text-positive { color: #2ecc71; }
+    .text-negative { color: #e74c3c; }
+    .stats-card {
+      text-align: center;
+      padding: 1rem;
+    }
+    .stats-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body class="bg-light">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">Gestor de Finanzas</a>
+    <a class="navbar-brand" href="#">
+      <i class="fas fa-chart-line me-2"></i>Gestor de Finanzas
+    </a>
+    <div class="navbar-nav ms-auto">
+      <a class="nav-link" th:href="@{/ingresos}">Ingresos</a>
+      <a class="nav-link" th:href="@{/gastos}">Gastos</a>
+    </div>
   </div>
 </nav>
 
-<div class="container py-5">
-  <div class="text-center mb-4">
-    <h2>Panel de Control</h2>
-    <p>Gestiona tus ingresos y gastos domésticos fácilmente</p>
+<div class="container-fluid py-4">
+
+  <!-- Alertas de error -->
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
 
-  <div class="row justify-content-center">
-    <div class="col-md-4 mb-3">
-      <div class="card text-center shadow">
-        <div class="card-body">
-          <h5 class="card-title">Ingresos</h5>
-          <p class="card-text">Agrega, consulta o modifica tus ingresos</p>
-          <a th:href="@{/ingresos}" class="btn btn-success">Gestionar Ingresos</a>
+  <!-- Saldo Total -->
+  <div class="row">
+    <div class="col-12">
+      <div class="dashboard-card text-center">
+        <h4 class="text-muted mb-2">Saldo Total</h4>
+        <div th:class="${saldoTotal >= 0} ? 'saldo-total saldo-positivo' : 'saldo-total saldo-negativo'"
+             th:text="${'€ ' + #numbers.formatDecimal(saldoTotal, 1, 'COMMA', 2, 'POINT')}">
+          € 0,00
         </div>
+        <small class="text-muted">Datos en tiempo real desde la base de datos</small>
       </div>
     </div>
-    <div class="col-md-4 mb-3">
-      <div class="card text-center shadow">
-        <div class="card-body">
-          <h5 class="card-title">Gastos</h5>
-          <p class="card-text">Administra tus gastos registrados</p>
-          <a th:href="@{/gastos}" class="btn btn-danger">Gestionar Gastos</a>
+  </div>
+
+  <!-- Estadísticas Rápidas -->
+  <div class="row">
+    <div class="col-md-3">
+      <div class="dashboard-card stats-card">
+        <i class="fas fa-arrow-down text-positive fa-2x mb-2"></i>
+        <div class="stats-number text-positive" th:text="${'€ ' + #numbers.formatDecimal(totalIngresos, 1, 'COMMA', 2, 'POINT')}">€ 0,00</div>
+        <small class="text-muted">Total Ingresos</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="dashboard-card stats-card">
+        <i class="fas fa-arrow-up text-negative fa-2x mb-2"></i>
+        <div class="stats-number text-negative" th:text="${'€ ' + #numbers.formatDecimal(totalGastos, 1, 'COMMA', 2, 'POINT')}">€ 0,00</div>
+        <small class="text-muted">Total Gastos</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="dashboard-card stats-card">
+        <i class="fas fa-exchange-alt text-primary fa-2x mb-2"></i>
+        <div class="stats-number" th:text="${totalTransacciones}">0</div>
+        <small class="text-muted">Total Transacciones</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="dashboard-card stats-card">
+        <i class="fas fa-database text-info fa-2x mb-2"></i>
+        <div class="stats-number" th:text="${gastos.size()}">0</div>
+        <small class="text-muted">Gastos Registrados</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Columna Izquierda -->
+    <div class="col-md-8">
+
+      <!-- Últimos Gastos -->
+      <div class="dashboard-card">
+        <h5 class="mb-3">
+          <i class="fas fa-money-bill-wave me-2"></i>Últimos Gastos
+          <span class="badge bg-secondary" th:text="${ultimosGastos.size()}">0</span>
+        </h5>
+
+        <div th:if="${ultimosGastos.empty}" class="text-center text-muted py-3">
+          <i class="fas fa-receipt fa-2x mb-2"></i>
+          <p>No hay gastos registrados</p>
+          <a th:href="@{/gastos/add}" class="btn btn-primary btn-sm">Agregar Primer Gasto</a>
+        </div>
+
+        <div th:each="gasto : ${ultimosGastos}" class="border-bottom py-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="flex-grow-1">
+              <strong th:text="${gasto != null ? gasto.descripcion : 'Descripción no disponible'}">Descripción del gasto</strong>
+              <small class="d-block text-muted">
+                <span th:text="${gasto != null ? #temporals.format(gasto.fechaGasto, 'dd/MM/yyyy') : 'Fecha no disponible'}">fecha</span>
+                <span th:if="${gasto != null and gasto.categoria != null and !gasto.categoria.empty}"
+                      th:text="${' - ' + gasto.categoria}"> - categoría</span>
+              </small>
+            </div>
+            <span class="text-negative fw-bold"
+                  th:text="${gasto != null ? '-€ ' + #numbers.formatDecimal(gasto.monto, 1, 'COMMA', 2, 'POINT') : '-€ 0,00'}">
+              -€ 0,00
+            </span>
+          </div>
+        </div>
+
+        <div th:if="${!ultimosGastos.empty}" class="text-center mt-3">
+          <a th:href="@{/gastos}" class="btn btn-outline-primary btn-sm">Ver Todos los Gastos</a>
         </div>
       </div>
+
+    </div>
+
+    <!-- Columna Derecha -->
+    <div class="col-md-4">
+
+      <!-- Gastos por Categoría -->
+      <div class="dashboard-card">
+        <h5 class="mb-3">
+          <i class="fas fa-tags me-2"></i>Gastos por Categoría
+        </h5>
+
+        <div th:if="${gastosPorCategoria.empty}" class="text-center text-muted py-3">
+          <i class="fas fa-folder-open fa-2x mb-2"></i>
+          <p>No hay gastos categorizados</p>
+        </div>
+
+        <div th:each="entry : ${gastosPorCategoria}" class="border-bottom py-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <strong th:text="${entry.key}">Categoría</strong>
+              <small class="d-block text-muted"
+                     th:text="${'€' + #numbers.formatDecimal(entry.value, 1, 'COMMA', 2, 'POINT')}">
+                €0,00
+              </small>
+            </div>
+            <div class="progress" style="width: 100px; height: 8px;">
+              <div class="progress-bar bg-primary"
+                   th:style="'width: ' + ${totalGastos > 0 ? (entry.value / totalGastos) * 100 : 0} + '%;'">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Últimos Ingresos -->
+      <div class="dashboard-card">
+        <h5 class="mb-3">
+          <i class="fas fa-arrow-down text-positive me-2"></i>Últimos Ingresos
+          <span class="badge bg-secondary" th:text="${ultimosIngresos.size()}">0</span>
+        </h5>
+
+        <div th:if="${ultimosIngresos.empty}" class="text-center text-muted py-3">
+          <i class="fas fa-wallet fa-2x mb-2"></i>
+          <p>No hay ingresos registrados</p>
+          <a th:href="@{/ingresos/add}" class="btn btn-success btn-sm">Agregar Primer Ingreso</a>
+        </div>
+
+        <div th:each="ingreso : ${ultimosIngresos}" class="border-bottom py-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="flex-grow-1">
+              <strong th:text="${ingreso != null ? ingreso.descripcion : 'Descripción no disponible'}">Descripción del ingreso</strong>
+              <small class="d-block text-muted"
+                     th:text="${ingreso != null ? #temporals.format(ingreso.fechaIngreso, 'dd/MM/yyyy') : 'Fecha no disponible'}">
+                fecha
+              </small>
+            </div>
+            <span class="text-positive fw-bold"
+                  th:text="${ingreso != null ? '+€ ' + #numbers.formatDecimal(ingreso.monto, 1, 'COMMA', 2, 'POINT') : '+€ 0,00'}">
+              +€ 0,00
+            </span>
+          </div>
+        </div>
+
+        <div th:if="${!ultimosIngresos.empty}" class="text-center mt-3">
+          <a th:href="@{/ingresos}" class="btn btn-outline-success btn-sm">Ver Todos los Ingresos</a>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>

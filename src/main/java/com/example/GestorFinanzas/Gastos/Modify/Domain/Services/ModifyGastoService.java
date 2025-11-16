@@ -22,7 +22,7 @@ public class ModifyGastoService {
         gastoExistente.setCategoria(gastoActualizado.getCategoria());
         gastoExistente.setMonto(gastoActualizado.getMonto());
         gastoExistente.setDescripcion(gastoActualizado.getDescripcion());
-        gastoExistente.setFechaIngreso(gastoActualizado.getFechaIngreso());
+        gastoExistente.setFechaGasto(gastoActualizado.getFechaGasto());
         gastoExistente.setIdUsuario(gastoActualizado.getIdUsuario());
 
         return repository.save(gastoExistente);
