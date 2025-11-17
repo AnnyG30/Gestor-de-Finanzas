@@ -1,25 +1,26 @@
 package com.example.GestorFinanzas.Ingresos.Add.Infra.Controller;
 
 
-import com.example.GestorFinanzas.Ingresos.Add.App.AddIngreso;
 import com.example.GestorFinanzas.Ingresos.Shared.App.Ingreso;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api/ingresos/add")
+import java.time.LocalDateTime;
+
+@Controller
+@RequestMapping("/api/ingresos") // ✅ Cambia el prefijo
 public class AddIngresoController {
 
-    private final AddIngreso addIngreso;
-
-    public AddIngresoController(AddIngreso addIngreso) {
-        this.addIngreso = addIngreso;
+    @GetMapping("/add")
+    public String mostrarFormularioAgregar(Model model) {
+        // ... mismo código
+        return "ingresos/form";
     }
 
-    @PostMapping
-    public Ingreso agregar(@RequestBody Ingreso ingreso) {
-        return addIngreso.ejecutar(ingreso);
+    @PostMapping("/save")
+    public String guardarIngreso(@ModelAttribute Ingreso ingreso, Model model) {
+        // ... mismo código
+        return "redirect:/ingresos"; // ✅ Redirige al listado principal
     }
 }

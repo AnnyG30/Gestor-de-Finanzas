@@ -75,6 +75,7 @@ public class DashboardController {
         return "dashboard/dashboard";
     }
 
+    // ✅ MÉTODO CALCULAR TOTAL - CORREGIDO CON PROTECCIÓN CONTRA NULL
     private double calcularTotal(List<?> items) {
         if (items == null || items.isEmpty()) {
             return 0.0;
@@ -83,46 +84,88 @@ public class DashboardController {
         double total = 0.0;
         for (Object item : items) {
             if (item instanceof Gasto) {
-                total += ((Gasto) item).getMonto();
+                Gasto gasto = (Gasto) item;
+                if (gasto != null && gasto.getMonto() != null) {
+                    total += gasto.getMonto();
+                }
             } else if (item instanceof Ingreso) {
-                total += ((Ingreso) item).getMonto();
+                Ingreso ingreso = (Ingreso) item;
+                if (ingreso != null && ingreso.getMonto() != null) {
+                    total += ingreso.getMonto();
+                }
             }
         }
         return total;
     }
 
-    // MÉTODO ESPECÍFICO PARA GASTOS - ORDENADO POR FECHA_GASTO
+    // ✅ MÉTODO PARA GASTOS - CORREGIDO CON PROTECCIÓN CONTRA FECHAS NULL
     private List<Gasto> obtenerUltimosGastos(List<Gasto> gastos, int limite) {
         if (gastos == null || gastos.isEmpty()) {
             return new ArrayList<>();
         }
 
-        // Ordenar por fechaGasto (los más recientes primero)
-        List<Gasto> gastosOrdenados = new ArrayList<>(gastos);
-        gastosOrdenados.sort((g1, g2) -> g2.getFechaGasto().compareTo(g1.getFechaGasto()));
+        // Filtrar gastos con fecha null y ordenar por fechaGasto
+        List<Gasto> gastosConFecha = new ArrayList<>();
+        List<Gasto> gastosSinFecha = new ArrayList<>();
+
+        for (Gasto gasto : gastos) {
+            if (gasto != null) {
+                if (gasto.getFechaGasto() != null) {
+                    gastosConFecha.add(gasto);
+                } else {
+                    gastosSinFecha.add(gasto);
+                }
+            }
+        }
+
+        // Ordenar solo los que tienen fecha
+        gastosConFecha.sort((g1, g2) -> g2.getFechaGasto().compareTo(g1.getFechaGasto()));
+
+        // Combinar: primero los con fecha (ordenados), luego los sin fecha
+        List<Gasto> todosGastos = new ArrayList<>();
+        todosGastos.addAll(gastosConFecha);
+        todosGastos.addAll(gastosSinFecha);
 
         // Limitar resultados
-        if (gastosOrdenados.size() > limite) {
-            return gastosOrdenados.subList(0, limite);
+        if (todosGastos.size() > limite) {
+            return todosGastos.subList(0, limite);
         }
-        return gastosOrdenados;
+        return todosGastos;
     }
 
-    // MÉTODO ESPECÍFICO PARA INGRESOS - ORDENADO POR FECHA_INGRESO
+    // ✅ MÉTODO PARA INGRESOS - CORREGIDO CON PROTECCIÓN CONTRA FECHAS NULL
     private List<Ingreso> obtenerUltimosIngresos(List<Ingreso> ingresos, int limite) {
         if (ingresos == null || ingresos.isEmpty()) {
             return new ArrayList<>();
         }
 
-        // Ordenar por fechaIngreso (los más recientes primero)
-        List<Ingreso> ingresosOrdenados = new ArrayList<>(ingresos);
-        ingresosOrdenados.sort((i1, i2) -> i2.getFechaIngreso().compareTo(i1.getFechaIngreso()));
+        // Filtrar ingresos con fecha null y ordenar por fechaIngreso
+        List<Ingreso> ingresosConFecha = new ArrayList<>();
+        List<Ingreso> ingresosSinFecha = new ArrayList<>();
+
+        for (Ingreso ingreso : ingresos) {
+            if (ingreso != null) {
+                if (ingreso.getFechaIngreso() != null) {
+                    ingresosConFecha.add(ingreso);
+                } else {
+                    ingresosSinFecha.add(ingreso);
+                }
+            }
+        }
+
+        // Ordenar solo los que tienen fecha
+        ingresosConFecha.sort((i1, i2) -> i2.getFechaIngreso().compareTo(i1.getFechaIngreso()));
+
+        // Combinar: primero los con fecha (ordenados), luego los sin fecha
+        List<Ingreso> todosIngresos = new ArrayList<>();
+        todosIngresos.addAll(ingresosConFecha);
+        todosIngresos.addAll(ingresosSinFecha);
 
         // Limitar resultados
-        if (ingresosOrdenados.size() > limite) {
-            return ingresosOrdenados.subList(0, limite);
+        if (todosIngresos.size() > limite) {
+            return todosIngresos.subList(0, limite);
         }
-        return ingresosOrdenados;
+        return todosIngresos;
     }
 
     private Map<String, Double> calcularGastosPorCategoria(List<Gasto> gastos) {

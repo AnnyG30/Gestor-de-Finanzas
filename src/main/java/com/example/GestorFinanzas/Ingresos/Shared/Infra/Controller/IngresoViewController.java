@@ -2,48 +2,104 @@ package com.example.GestorFinanzas.Ingresos.Shared.Infra.Controller;
 
 import org.springframework.ui.Model;
 import com.example.GestorFinanzas.Ingresos.Shared.App.Ingreso;
-import com.example.GestorFinanzas.Ingresos.Shared.Domain.Services.IngresoService;
+import com.example.GestorFinanzas.Ingresos.Add.Domain.Services.AddIngresoService;
+import com.example.GestorFinanzas.Ingresos.Consult.Domain.Services.ConsultIngresoService;
+import com.example.GestorFinanzas.Ingresos.Modify.Domain.Services.ModifyIngresoService;
+import com.example.GestorFinanzas.Ingresos.Delete.Domain.Services.DeleteIngresoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/ingresos")
 public class IngresoViewController {
 
     @Autowired
-    private IngresoService ingresoService;
+    private AddIngresoService addIngresoService;
+
+    @Autowired
+    private ConsultIngresoService consultIngresoService;
+
+    @Autowired
+    private ModifyIngresoService modifyIngresoService;
+
+    @Autowired
+    private DeleteIngresoService deleteIngresoService;
 
     @GetMapping
-    public String listar(Model model) {
-        model.addAttribute("ingresos", ingresoService.obtenerTodos());
-        return "ingresos/list"; // templates/ingresos/list.html
+    public String listarIngresos(Model model) {
+        model.addAttribute("ingresos", consultIngresoService.listarTodos());
+        return "ingresos/list";
     }
 
     @GetMapping("/add")
-    public String mostrarFormulario(Model model) {
-        model.addAttribute("ingreso", new Ingreso());
+    public String mostrarFormularioNuevo(Model model) {
+        Ingreso ingreso = new Ingreso();
+        ingreso.setFechaIngreso(LocalDateTime.now()); // ← Fecha por defecto
+        model.addAttribute("ingreso", ingreso);
         model.addAttribute("titulo", "Nuevo Ingreso");
-        return "ingresos/form"; // templates/ingresos/form.html
+        return "ingresos/form";
     }
 
-    @PostMapping("/save")
-    public String guardar(@ModelAttribute Ingreso ingreso) {
-        ingresoService.guardar(ingreso);
+    @PostMapping("/add")
+    public String procesarNuevoIngreso(@ModelAttribute Ingreso ingreso, RedirectAttributes redirectAttributes) {
+        try {
+            System.out.println("💾 Guardando ingreso con fecha: " + ingreso.getFechaIngreso());
+
+            if (ingreso.getIdUsuario() == null) {
+                ingreso.setIdUsuario(1L);
+            }
+
+            // Si no hay fecha, establecer la actual
+            if (ingreso.getFechaIngreso() == null) {
+                ingreso.setFechaIngreso(LocalDateTime.now());
+            }
+
+            addIngresoService.agregarIngreso(ingreso);
+            redirectAttributes.addFlashAttribute("success", "Ingreso agregado correctamente!");
+
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/ingresos/add";
+        }
         return "redirect:/ingresos";
     }
 
     @GetMapping("/edit/{id}")
-    public String editar(@PathVariable Long id, Model model) {
-        Ingreso ingreso = ingresoService.obtenerPorId(id);
-        model.addAttribute("ingreso", ingreso);
-        model.addAttribute("titulo", "Editar Ingreso");
-        return "ingresos/form";
+    public String mostrarFormularioEditar(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            Ingreso ingreso = consultIngresoService.buscarPorId(id);
+            model.addAttribute("ingreso", ingreso);
+            model.addAttribute("titulo", "Editar Ingreso");
+            return "ingresos/form";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/ingresos";
+        }
+    }
+
+    @PostMapping("/edit/{id}")
+    public String procesarEdicionIngreso(@PathVariable Long id, @ModelAttribute Ingreso ingreso, RedirectAttributes redirectAttributes) {
+        try {
+            modifyIngresoService.modificarIngreso(id, ingreso);
+            redirectAttributes.addFlashAttribute("success", "Ingreso actualizado correctamente!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/ingresos";
     }
 
     @GetMapping("/delete/{id}")
-    public String eliminar(@PathVariable Long id) {
-        ingresoService.eliminar(id);
+    public String eliminarIngreso(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            deleteIngresoService.eliminar(id);
+            redirectAttributes.addFlashAttribute("success", "Ingreso eliminado correctamente!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/ingresos";
     }
 }
