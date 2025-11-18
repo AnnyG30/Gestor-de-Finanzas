@@ -9,10 +9,15 @@
 <div class="container mt-4">
   <h1 th:text="${titulo}">Formulario de Ingreso</h1>
 
-  <!-- Mensajes de error -->
+  <!-- Mensajes de éxito/error -->
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
   <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-  <form th:action="@{/ingresos/add}" method="post" th:object="${ingreso}">
+  <!-- FORMULARIO DINÁMICO: funciona para ADD y EDIT -->
+  <form th:action="${ingreso.idIngreso != null} ?
+                   @{/ingresos/edit/{id}(id=${ingreso.idIngreso})} :
+                   @{/ingresos/add}"
+        method="post" th:object="${ingreso}">
 
     <div class="mb-3">
       <label for="descripcion" class="form-label">Descripción *</label>
@@ -20,8 +25,8 @@
     </div>
 
     <div class="mb-3">
-      <label for="monto" class="form-label">Monto *</label>
-      <input type="number" step="0.01" class="form-control" id="monto" th:field="*{monto}" required>
+      <label for="monto" class="form-label">Monto (€) *</label>
+      <input type="number" step="0.01" min="0.01" class="form-control" id="monto" th:field="*{monto}" required>
     </div>
 
     <div class="mb-3">
@@ -31,26 +36,31 @@
 
     <div class="mb-3">
       <label for="categoria" class="form-label">Categoría</label>
-      <input type="text" class="form-control" id="categoria" th:field="*{categoria}">
+      <input type="text" class="form-control" id="categoria" th:field="*{categoria}" placeholder="Ej: Salario, Ventas, Inversiones...">
     </div>
 
     <!-- Campo oculto para idUsuario -->
-    <input type="hidden" th:field="*{idUsuario}" value="1">
+    <input type="hidden" th:field="*{idUsuario}">
 
-    <button type="submit" class="btn btn-success">Guardar Ingreso</button>
-    <a th:href="@{/ingresos}" class="btn btn-secondary">Cancelar</a>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-success">
+        <span th:text="${ingreso.idIngreso != null} ? 'Actualizar' : 'Guardar'">Guardar</span> Ingreso
+      </button>
+      <a th:href="@{/ingresos}" class="btn btn-secondary">Cancelar</a>
+    </div>
   </form>
 </div>
 
 <script>
-  // Establecer fecha y hora actual por defecto
+  // Establecer fecha y hora actual por defecto solo si no hay valor
   document.addEventListener('DOMContentLoaded', function() {
     const fechaInput = document.getElementById('fechaIngreso');
     if (!fechaInput.value) {
       const now = new Date();
-      // Formato: YYYY-MM-DDTHH:MM
-      const localDateTime = now.toISOString().slice(0, 16);
-      fechaInput.value = localDateTime;
+      // Ajustar para el desfase de zona horaria
+      const timezoneOffset = now.getTimezoneOffset() * 60000;
+      const localISOTime = new Date(now - timezoneOffset).toISOString().slice(0, 16);
+      fechaInput.value = localISOTime;
     }
   });
 </script>

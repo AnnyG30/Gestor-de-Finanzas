@@ -1,4 +1,4 @@
-CREATE DATABASE gestor_finanzas;
+    CREATE DATABASE gestor_finanzas;
 USE gestor_finanzas;
 
 CREATE TABLE usuarios (

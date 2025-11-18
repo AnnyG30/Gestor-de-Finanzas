@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.time.LocalDateTime; // ← Asegúrate de importar esto
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping("/gastos")
@@ -30,14 +32,35 @@ public class GastoViewController {
 
     @GetMapping
     public String listarGastos(Model model) {
-        model.addAttribute("gastos", consultGastoService.listarTodos());
+        try {
+            List<Gasto> gastos = consultGastoService.listarTodos();
+
+            // Calcular total de gastos
+            Double totalGastos = gastos.stream()
+                    .mapToDouble(gasto -> gasto.getMonto() != null ? gasto.getMonto() : 0.0)
+                    .sum();
+
+            // Calcular promedio mensual (puedes ajustar esta lógica según tus necesidades)
+            Double promedioMensual = totalGastos / Math.max(gastos.size(), 1);
+
+            model.addAttribute("gastos", gastos);
+            model.addAttribute("totalGastos", totalGastos);
+            model.addAttribute("promedioMensual", promedioMensual);
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al cargar gastos: " + e.getMessage());
+            model.addAttribute("gastos", new ArrayList<Gasto>());
+            model.addAttribute("totalGastos", 0.0);
+            model.addAttribute("promedioMensual", 0.0);
+        }
+
         return "gastos/list";
     }
 
     @GetMapping("/add")
     public String mostrarFormularioNuevo(Model model) {
         Gasto gasto = new Gasto();
-        gasto.setFechaGasto(LocalDateTime.now()); // ← Fecha por defecto
+        gasto.setFechaGasto(LocalDateTime.now());
         model.addAttribute("gasto", gasto);
         model.addAttribute("titulo", "Nuevo Gasto");
         return "gastos/form";
@@ -52,7 +75,6 @@ public class GastoViewController {
                 gasto.setIdUsuario(1L);
             }
 
-            // Si no hay fecha, establecer la actual
             if (gasto.getFechaGasto() == null) {
                 gasto.setFechaGasto(LocalDateTime.now());
             }
@@ -68,7 +90,6 @@ public class GastoViewController {
         return "redirect:/gastos";
     }
 
-    // ... (los otros métodos se mantienen igual)
     @GetMapping("/edit/{id}")
     public String mostrarFormularioEditar(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         try {

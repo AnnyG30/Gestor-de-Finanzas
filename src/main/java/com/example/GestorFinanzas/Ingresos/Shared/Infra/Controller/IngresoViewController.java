@@ -1,5 +1,6 @@
 package com.example.GestorFinanzas.Ingresos.Shared.Infra.Controller;
 
+import com.example.GestorFinanzas.Gastos.Consult.Domain.Services.ConsultGastoService;
 import org.springframework.ui.Model;
 import com.example.GestorFinanzas.Ingresos.Shared.App.Ingreso;
 import com.example.GestorFinanzas.Ingresos.Add.Domain.Services.AddIngresoService;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 @RequestMapping("/ingresos")
@@ -26,13 +28,34 @@ public class IngresoViewController {
     private ModifyIngresoService modifyIngresoService;
 
     @Autowired
+    private ConsultGastoService consultGastoService;
+
+    @Autowired
     private DeleteIngresoService deleteIngresoService;
 
     @GetMapping
     public String listarIngresos(Model model) {
-        model.addAttribute("ingresos", consultIngresoService.listarTodos());
+        List<Ingreso> ingresos = consultIngresoService.listarTodos();
+
+        // Calcular total de ingresos
+        Double totalIngresos = ingresos.stream()
+                .mapToDouble(Ingreso::getMonto)
+                .sum();
+
+        // Aquí necesitas obtener los gastos para calcular el saldo total
+        // Si no tienes este servicio, puedes omitir el saldo por ahora
+        Double totalGastos = 0.0; // Reemplaza con tu lógica para obtener gastos
+        Double saldoTotal = totalIngresos - totalGastos;
+
+        // Agregar datos al modelo
+        model.addAttribute("ingresos", ingresos);
+        model.addAttribute("totalIngresos", totalIngresos);
+        model.addAttribute("saldoTotal", saldoTotal);
+
         return "ingresos/list";
     }
+
+
 
     @GetMapping("/add")
     public String mostrarFormularioNuevo(Model model) {
