@@ -30,6 +30,40 @@
       font-size: 1.5rem;
       font-weight: bold;
     }
+
+    .frase-card {
+      background: linear-gradient(135deg, #91A3B0, #7a8f9d);
+      color: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .frase-text {
+      font-style: italic;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+    .frase-autor {
+      text-align: right;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    .refresh-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s ease;
+    }
+    .refresh-btn:hover {
+      background: rgba(255,255,255,0.1);
+      transform: rotate(15deg);
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -63,7 +97,7 @@
              th:text="${'€ ' + #numbers.formatDecimal(saldoTotal, 1, 'COMMA', 2, 'POINT')}">
           € 0,00
         </div>
-        <small class="text-muted">Datos en tiempo real desde la base de datos</small>
+        <small class="text-muted">Saldo total</small>
       </div>
     </div>
   </div>
@@ -207,9 +241,33 @@
         </div>
       </div>
 
+      <!-- Frase Motivadora -->
+      <div class="frase-card">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h5><i class="fas fa-quote-left me-2"></i>Frase Motivadora</h5>
+          <button class="refresh-btn" onclick="frasesMotivadoras.cargarFrase()">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+        <div id="fraseMotivadora">
+          <div class="frase-text">"La mejor manera de predecir el futuro es crearlo."</div>
+          <div class="frase-autor">- Peter Drucker</div>
+        </div>
+      </div>
+
     </div>
   </div>
+
 </div>
+
+<!-- Scripts -->
+<script src="/js/frases_motivadoras.js"></script>
+<script>
+  // Inicializar cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', function() {
+    frasesMotivadoras.inicializar();
+  });
+</script>
 
 </body>
 </html>
