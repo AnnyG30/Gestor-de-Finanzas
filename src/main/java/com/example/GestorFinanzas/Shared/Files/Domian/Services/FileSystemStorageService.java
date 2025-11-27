@@ -1,8 +1,8 @@
-package com.example.GestorFinanzas.Ingresos.Files.Domian.Services;
+package com.example.GestorFinanzas.Shared.Files.Domian.Services;
 
-import com.example.GestorFinanzas.Ingresos.Files.Infra.Config.StorageProperties;
-import com.example.GestorFinanzas.Ingresos.Files.Infra.Exception.StorageException;
-import com.example.GestorFinanzas.Ingresos.Files.Infra.Exception.StorageFileNotFoundException;
+import com.example.GestorFinanzas.Shared.Files.Infra.Config.StorageProperties;
+import com.example.GestorFinanzas.Shared.Files.Infra.Exception.StorageException;
+import com.example.GestorFinanzas.Shared.Files.Infra.Exception.StorageFileNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;

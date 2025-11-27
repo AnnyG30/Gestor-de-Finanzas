@@ -1,4 +1,4 @@
-package com.example.GestorFinanzas.Ingresos.Files.Infra.Config;
+package com.example.GestorFinanzas.Shared.Files.Infra.Config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package com.example.GestorFinanzas.Ingresos.Files.Domian.Services;
+package com.example.GestorFinanzas.Shared.Files.Domian.Services;
 
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;

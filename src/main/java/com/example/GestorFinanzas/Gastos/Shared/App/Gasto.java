@@ -26,6 +26,9 @@ public class Gasto {
     @Column(name = "fecha_gasto")
     private LocalDate fechaGasto;
 
+    @Column(name = "archivo_adjunto")
+    private String archivoAdjunto;
+
     private String categoria;
 
     private Double monto;

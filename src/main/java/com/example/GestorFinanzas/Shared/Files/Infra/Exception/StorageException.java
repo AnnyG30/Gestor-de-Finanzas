@@ -1,4 +1,4 @@
-package com.example.GestorFinanzas.Ingresos.Files.Infra.Exception;
+package com.example.GestorFinanzas.Shared.Files.Infra.Exception;
 
 public class StorageException extends RuntimeException{
 

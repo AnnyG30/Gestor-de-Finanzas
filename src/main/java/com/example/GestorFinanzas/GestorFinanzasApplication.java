@@ -1,7 +1,7 @@
 package com.example.GestorFinanzas;
 
-import com.example.GestorFinanzas.Ingresos.Files.Domian.Services.StorageService;
-import com.example.GestorFinanzas.Ingresos.Files.Infra.Config.StorageProperties;
+import com.example.GestorFinanzas.Shared.Files.Domian.Services.StorageService;
+import com.example.GestorFinanzas.Shared.Files.Infra.Config.StorageProperties;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

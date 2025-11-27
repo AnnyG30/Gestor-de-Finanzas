@@ -39,7 +39,7 @@
       <input type="text" class="form-control" id="categoria" th:field="*{categoria}" placeholder="Ej: Salario, Ventas, Inversiones...">
     </div>
 
-    <!-- NUEVO: Campo para subir archivo -->
+    <!--  Campo para subir archivo -->
     <div class="mb-3">
       <label for="file" class="form-label">Adjuntar archivo (opcional)</label>
       <input type="file" class="form-control" id="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx">
@@ -51,7 +51,7 @@
 
     <div class="d-flex gap-2">
       <button type="submit" class="btn btn-success">
-        <span th:text="${ingreso.idIngreso != null} ? 'Actualizar' : 'Guardar'">Guardar</span> Ingreso
+        <span th:text="${ingreso.idIngreso != null} ? 'Actualizar' : 'Guardar'">Guardar Ingreso</span>
       </button>
       <a th:href="@{/ingresos}" class="btn btn-secondary">Cancelar</a>
     </div>

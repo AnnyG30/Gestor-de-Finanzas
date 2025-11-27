@@ -7,7 +7,7 @@ import com.example.GestorFinanzas.Ingresos.Add.Domain.Services.AddIngresoService
 import com.example.GestorFinanzas.Ingresos.Consult.Domain.Services.ConsultIngresoService;
 import com.example.GestorFinanzas.Ingresos.Modify.Domain.Services.ModifyIngresoService;
 import com.example.GestorFinanzas.Ingresos.Delete.Domain.Services.DeleteIngresoService;
-import com.example.GestorFinanzas.Ingresos.Files.Domian.Services.StorageService;
+import com.example.GestorFinanzas.Shared.Files.Domian.Services.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +38,7 @@ public class IngresoViewController {
     private DeleteIngresoService deleteIngresoService;
 
     @Autowired
-    private StorageService storageService; // Asegúrate de inyectar el StorageService
+    private StorageService storageService; // inyectar el StorageService
 
     @GetMapping
     public String listarIngresos(Model model) {
@@ -72,9 +72,7 @@ public class IngresoViewController {
     }
 
     @PostMapping("/add")
-    public String procesarNuevoIngreso(@ModelAttribute Ingreso ingreso,
-                                       @RequestParam(value = "file", required = false) MultipartFile file,
-                                       RedirectAttributes redirectAttributes) {
+    public String procesarNuevoIngreso(@ModelAttribute Ingreso ingreso, @RequestParam(value = "file", required = false) MultipartFile file, RedirectAttributes redirectAttributes) {
         try {
             System.out.println("💾 Guardando ingreso con fecha: " + ingreso.getFechaIngreso());
 

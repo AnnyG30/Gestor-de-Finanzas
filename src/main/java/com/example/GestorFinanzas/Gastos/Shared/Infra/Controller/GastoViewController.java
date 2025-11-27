@@ -1,5 +1,6 @@
 package com.example.GestorFinanzas.Gastos.Shared.Infra.Controller;
 
+import com.example.GestorFinanzas.Shared.Files.Domian.Services.StorageService;
 import org.springframework.ui.Model;
 import com.example.GestorFinanzas.Gastos.Shared.App.Gasto;
 import com.example.GestorFinanzas.Gastos.Add.Domain.Services.AddGastoService;
@@ -9,6 +10,7 @@ import com.example.GestorFinanzas.Gastos.Delete.Domain.Services.DeleteGastoServi
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
@@ -30,6 +32,9 @@ public class GastoViewController {
 
     @Autowired
     private DeleteGastoService deleteGastoService;
+
+    @Autowired
+    private StorageService storageService;
 
     @GetMapping
     public String listarGastos(Model model) {
@@ -68,7 +73,9 @@ public class GastoViewController {
     }
 
     @PostMapping("/add")
-    public String procesarNuevoGasto(@ModelAttribute Gasto gasto, RedirectAttributes redirectAttributes) {
+    public String procesarNuevoGasto(@ModelAttribute Gasto gasto,
+                                     @RequestParam(value = "file", required = false) MultipartFile file,
+                                     RedirectAttributes redirectAttributes) {
         try {
             System.out.println("💾 Guardando gasto con fecha: " + gasto.getFechaGasto());
 
@@ -80,12 +87,28 @@ public class GastoViewController {
                 gasto.setFechaGasto(LocalDate.now());
             }
 
+            // Guardar el gasto primero
             addGastoService.agregarGasto(gasto);
-            redirectAttributes.addFlashAttribute("success", "Gasto agregado correctamente!");
+
+            // Procesar archivo si se proporcionó
+            if (file != null && !file.isEmpty()) {
+                try {
+                    storageService.store(file);
+                    redirectAttributes.addFlashAttribute("success",
+                            "Gasto agregado y archivo subido correctamente!");
+                    System.out.println("📁 Archivo subido: " + file.getOriginalFilename());
+                } catch (Exception e) {
+                    redirectAttributes.addFlashAttribute("warning",
+                            "Gasto guardado pero error al subir archivo: " + e.getMessage());
+                    System.out.println("⚠️ Error subiendo archivo: " + e.getMessage());
+                }
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Gasto agregado correctamente!");
+            }
 
         } catch (Exception e) {
             System.out.println("❌ Error: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error al guardar gasto: " + e.getMessage());
             return "redirect:/gastos/add";
         }
         return "redirect:/gastos";
@@ -105,10 +128,28 @@ public class GastoViewController {
     }
 
     @PostMapping("/edit/{id}")
-    public String procesarEdicionGasto(@PathVariable Long id, @ModelAttribute Gasto gasto, RedirectAttributes redirectAttributes) {
+    public String procesarEdicionGasto(@PathVariable Long id,
+                                       @ModelAttribute Gasto gasto,
+                                       @RequestParam(value = "file", required = false) MultipartFile file,
+                                       RedirectAttributes redirectAttributes) {
         try {
             modifyGastoService.modificarGasto(id, gasto);
-            redirectAttributes.addFlashAttribute("success", "Gasto actualizado correctamente!");
+
+            // Procesar archivo si se proporcionó en la edición
+            if (file != null && !file.isEmpty()) {
+                try {
+                    storageService.store(file);
+                    redirectAttributes.addFlashAttribute("success",
+                            "Gasto actualizado y archivo subido correctamente!");
+                    System.out.println("📁 Archivo subido en edición: " + file.getOriginalFilename());
+                } catch (Exception e) {
+                    redirectAttributes.addFlashAttribute("warning",
+                            "Gasto actualizado pero error al subir archivo: " + e.getMessage());
+                }
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Gasto actualizado correctamente!");
+            }
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }

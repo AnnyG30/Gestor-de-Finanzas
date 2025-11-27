@@ -1,7 +1,7 @@
-package com.example.GestorFinanzas.Ingresos.Files.Infra.Controller;
+package com.example.GestorFinanzas.Shared.Files.Infra.Controller;
 
 
-import com.example.GestorFinanzas.Ingresos.Files.Domian.Services.StorageService;
+import com.example.GestorFinanzas.Shared.Files.Domian.Services.StorageService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
