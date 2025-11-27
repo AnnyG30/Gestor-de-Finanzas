@@ -1,0 +1,167 @@
+package com.example.GestorFinanzas.Ingresos.Shared.Infra.Controller;
+
+import com.example.GestorFinanzas.Gastos.Consult.Domain.Services.ConsultGastoService;
+import org.springframework.ui.Model;
+import com.example.GestorFinanzas.Ingresos.Shared.App.Ingreso;
+import com.example.GestorFinanzas.Ingresos.Add.Domain.Services.AddIngresoService;
+import com.example.GestorFinanzas.Ingresos.Consult.Domain.Services.ConsultIngresoService;
+import com.example.GestorFinanzas.Ingresos.Modify.Domain.Services.ModifyIngresoService;
+import com.example.GestorFinanzas.Ingresos.Delete.Domain.Services.DeleteIngresoService;
+import com.example.GestorFinanzas.Shared.Files.Domian.Services.StorageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDate;
+
+import java.util.List;
+
+@Controller
+@RequestMapping("/ingresos")
+public class IngresoViewController {
+
+    @Autowired
+    private AddIngresoService addIngresoService;
+
+    @Autowired
+    private ConsultIngresoService consultIngresoService;
+
+    @Autowired
+    private ModifyIngresoService modifyIngresoService;
+
+    @Autowired
+    private ConsultGastoService consultGastoService;
+
+    @Autowired
+    private DeleteIngresoService deleteIngresoService;
+
+    @Autowired
+    private StorageService storageService; // inyectar el StorageService
+
+    @GetMapping
+    public String listarIngresos(Model model) {
+        List<Ingreso> ingresos = consultIngresoService.listarTodos();
+
+        // Calcular total de ingresos
+        Double totalIngresos = ingresos.stream()
+                .mapToDouble(Ingreso::getMonto)
+                .sum();
+
+        // Aquí necesitas obtener los gastos para calcular el saldo total
+        // Si no tienes este servicio, puedes omitir el saldo por ahora
+        Double totalGastos = 0.0; // Reemplaza con tu lógica para obtener gastos
+        Double saldoTotal = totalIngresos - totalGastos;
+
+        // Agregar datos al modelo
+        model.addAttribute("ingresos", ingresos);
+        model.addAttribute("totalIngresos", totalIngresos);
+        model.addAttribute("saldoTotal", saldoTotal);
+
+        return "ingresos/list";
+    }
+
+    @GetMapping("/add")
+    public String mostrarFormularioNuevo(Model model) {
+        Ingreso ingreso = new Ingreso();
+        ingreso.setFechaIngreso(LocalDate.now()); // ← Fecha por defecto
+        model.addAttribute("ingreso", ingreso);
+        model.addAttribute("titulo", "Nuevo Ingreso");
+        return "ingresos/form";
+    }
+
+    @PostMapping("/add")
+    public String procesarNuevoIngreso(@ModelAttribute Ingreso ingreso, @RequestParam(value = "file", required = false) MultipartFile file, RedirectAttributes redirectAttributes) {
+        try {
+            System.out.println("💾 Guardando ingreso con fecha: " + ingreso.getFechaIngreso());
+
+            if (ingreso.getIdUsuario() == null) {
+                ingreso.setIdUsuario(1L);
+            }
+
+            // Si no hay fecha, establecer la actual
+            if (ingreso.getFechaIngreso() == null) {
+                ingreso.setFechaIngreso(LocalDate.now());
+            }
+
+            // Guardar el ingreso primero
+            addIngresoService.agregarIngreso(ingreso);
+
+            // Procesar archivo si se proporcionó
+            if (file != null && !file.isEmpty()) {
+                try {
+                    storageService.store(file);
+                    redirectAttributes.addFlashAttribute("success",
+                            "Ingreso agregado y archivo subido correctamente!");
+                    System.out.println("📁 Archivo subido: " + file.getOriginalFilename());
+                } catch (Exception e) {
+                    redirectAttributes.addFlashAttribute("warning",
+                            "Ingreso guardado pero error al subir archivo: " + e.getMessage());
+                    System.out.println("⚠️ Error subiendo archivo: " + e.getMessage());
+                }
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Ingreso agregado correctamente!");
+            }
+
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error al guardar ingreso: " + e.getMessage());
+            return "redirect:/ingresos/add";
+        }
+        return "redirect:/ingresos";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String mostrarFormularioEditar(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            Ingreso ingreso = consultIngresoService.buscarPorId(id);
+            model.addAttribute("ingreso", ingreso);
+            model.addAttribute("titulo", "Editar Ingreso");
+            return "ingresos/form";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/ingresos";
+        }
+    }
+
+    @PostMapping("/edit/{id}")
+    public String procesarEdicionIngreso(@PathVariable Long id,
+                                         @ModelAttribute Ingreso ingreso,
+                                         @RequestParam(value = "file", required = false) MultipartFile file,
+                                         RedirectAttributes redirectAttributes) {
+        try {
+            modifyIngresoService.modificarIngreso(id, ingreso);
+
+            // Procesar archivo si se proporcionó en la edición
+            if (file != null && !file.isEmpty()) {
+                try {
+                    storageService.store(file);
+                    redirectAttributes.addFlashAttribute("success",
+                            "Ingreso actualizado y archivo subido correctamente!");
+                    System.out.println("📁 Archivo subido en edición: " + file.getOriginalFilename());
+                } catch (Exception e) {
+                    redirectAttributes.addFlashAttribute("warning",
+                            "Ingreso actualizado pero error al subir archivo: " + e.getMessage());
+                }
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Ingreso actualizado correctamente!");
+            }
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/ingresos";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String eliminarIngreso(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            deleteIngresoService.eliminar(id);
+            redirectAttributes.addFlashAttribute("success", "Ingreso eliminado correctamente!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/ingresos";
+    }
+}

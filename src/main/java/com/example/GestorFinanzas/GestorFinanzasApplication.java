@@ -1,0 +1,25 @@
+package com.example.GestorFinanzas;
+
+import com.example.GestorFinanzas.Shared.Files.Domian.Services.StorageService;
+import com.example.GestorFinanzas.Shared.Files.Infra.Config.StorageProperties;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+
+@SpringBootApplication
+@EnableConfigurationProperties(StorageProperties.class)
+public class GestorFinanzasApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(GestorFinanzasApplication.class, args);
+    }
+
+    @Bean
+    CommandLineRunner init(StorageService storageService) {
+
+        return (String[] args) -> storageService.init();
+    }
+
+}
