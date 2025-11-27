@@ -161,7 +161,7 @@
       <tbody>
       <tr th:each="gasto : ${gastos}">
         <td th:text="${gasto.idGasto}"></td>
-        <td th:text="${#temporals.format(gasto.fechaGasto, 'dd/MM/yyyy HH:mm')}"></td>
+        <td th:text="${#temporals.format(gasto.fechaGasto, 'dd/MM/yyyy')}"></td>
         <td>
           <span class="badge" style="background-color: #91A3B0; color: white;"
                 th:text="${gasto.categoria}"></span>

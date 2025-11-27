@@ -75,7 +75,7 @@ public class DashboardController {
         return "dashboard/dashboard";
     }
 
-    // ✅ MÉTODO CALCULAR TOTAL - CORREGIDO CON PROTECCIÓN CONTRA NULL
+    //  MÉTODO CALCULAR TOTAL
     private double calcularTotal(List<?> items) {
         if (items == null || items.isEmpty()) {
             return 0.0;
@@ -98,7 +98,7 @@ public class DashboardController {
         return total;
     }
 
-    // ✅ MÉTODO PARA GASTOS - CORREGIDO CON PROTECCIÓN CONTRA FECHAS NULL
+    //  MÉTODO PARA GASTOS
     private List<Gasto> obtenerUltimosGastos(List<Gasto> gastos, int limite) {
         if (gastos == null || gastos.isEmpty()) {
             return new ArrayList<>();
@@ -133,7 +133,7 @@ public class DashboardController {
         return todosGastos;
     }
 
-    // ✅ MÉTODO PARA INGRESOS - CORREGIDO CON PROTECCIÓN CONTRA FECHAS NULL
+    //  MÉTODO PARA INGRESOS
     private List<Ingreso> obtenerUltimosIngresos(List<Ingreso> ingresos, int limite) {
         if (ingresos == null || ingresos.isEmpty()) {
             return new ArrayList<>();
@@ -176,13 +176,13 @@ public class DashboardController {
         }
 
         for (Gasto gasto : gastos) {
-            // ✅ VALIDACIÓN MÁS ROBUSTA PARA CATEGORÍAS NULL
+            //  VALIDACIÓN MÁS ROBUSTA PARA CATEGORÍAS NULL
             String categoria = gasto.getCategoria();
             if (categoria == null || categoria.trim().isEmpty()) {
                 categoria = "Sin Categoría";
             }
 
-            // ✅ VALIDAR QUE MONTO NO SEA NULL
+            //  VALIDAR QUE MONTO NO SEA NULL
             Double monto = gasto.getMonto();
             if (monto == null) {
                 monto = 0.0;

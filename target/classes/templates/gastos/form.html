@@ -27,7 +27,7 @@
     <!-- CAMBIADO: fechaIngreso → fechaGasto -->
     <div class="mb-3">
       <label for="fechaGasto" class="form-label">Fecha *</label>
-      <input type="datetime-local" class="form-control" id="fechaGasto" th:field="*{fechaGasto}" required>
+      <input type="date" class="form-control" id="fechaGasto" th:field="*{fechaGasto}" required>
     </div>
 
     <div class="mb-3">
@@ -43,17 +43,6 @@
   </form>
 </div>
 
-<script>
-  // Establecer fecha y hora actual por defecto
-  document.addEventListener('DOMContentLoaded', function() {
-    const fechaInput = document.getElementById('fechaGasto');
-    if (!fechaInput.value) {
-      const now = new Date();
-      // Formato: YYYY-MM-DDTHH:MM
-      const localDateTime = now.toISOString().slice(0, 16);
-      fechaInput.value = localDateTime;
-    }
-  });
-</script>
+<script src="../js/fechaGasto.js"></script>
 </body>
 </html>

@@ -13,7 +13,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
+
 import java.util.List;
 
 @Controller
@@ -63,7 +65,7 @@ public class IngresoViewController {
     @GetMapping("/add")
     public String mostrarFormularioNuevo(Model model) {
         Ingreso ingreso = new Ingreso();
-        ingreso.setFechaIngreso(LocalDateTime.now()); // ← Fecha por defecto
+        ingreso.setFechaIngreso(LocalDate.now()); // ← Fecha por defecto
         model.addAttribute("ingreso", ingreso);
         model.addAttribute("titulo", "Nuevo Ingreso");
         return "ingresos/form";
@@ -82,7 +84,7 @@ public class IngresoViewController {
 
             // Si no hay fecha, establecer la actual
             if (ingreso.getFechaIngreso() == null) {
-                ingreso.setFechaIngreso(LocalDateTime.now());
+                ingreso.setFechaIngreso(LocalDate.now());
             }
 
             // Guardar el ingreso primero

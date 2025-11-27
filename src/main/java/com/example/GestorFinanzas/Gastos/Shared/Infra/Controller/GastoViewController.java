@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class GastoViewController {
     @GetMapping("/add")
     public String mostrarFormularioNuevo(Model model) {
         Gasto gasto = new Gasto();
-        gasto.setFechaGasto(LocalDateTime.now());
+        gasto.setFechaGasto(LocalDate.now());
         model.addAttribute("gasto", gasto);
         model.addAttribute("titulo", "Nuevo Gasto");
         return "gastos/form";
@@ -76,7 +77,7 @@ public class GastoViewController {
             }
 
             if (gasto.getFechaGasto() == null) {
-                gasto.setFechaGasto(LocalDateTime.now());
+                gasto.setFechaGasto(LocalDate.now());
             }
 
             addGastoService.agregarGasto(gasto);

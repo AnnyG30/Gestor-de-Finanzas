@@ -152,7 +152,7 @@
       <tbody>
       <tr th:each="ingreso : ${ingresos}">
         <td th:text="${ingreso.idIngreso}"></td>
-        <td th:text="${#temporals.format(ingreso.fechaIngreso, 'dd/MM/yyyy HH:mm')}"></td>
+        <td th:text="${#temporals.format(ingreso.fechaIngreso, 'dd/MM/yyyy ')}"></td>
         <td>
           <span class="badge" style="background-color: #DBD7D2; color: #2c3e50;"
                 th:text="${ingreso.categoria}"></span>
