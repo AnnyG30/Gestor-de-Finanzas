@@ -25,6 +25,18 @@ public class Ingreso {
     @Column(name = "fecha_ingreso")
     private LocalDateTime fechaIngreso;
 
+    @Column(name = "archivo_adjunto")
+    private String archivoAdjunto;
+
+    // Getters y Setters
+    public String getArchivoAdjunto() {
+        return archivoAdjunto;
+    }
+
+    public void setArchivoAdjunto(String archivoAdjunto) {
+        this.archivoAdjunto = archivoAdjunto;
+    }
+
     private String categoria;
 
     private Double monto;

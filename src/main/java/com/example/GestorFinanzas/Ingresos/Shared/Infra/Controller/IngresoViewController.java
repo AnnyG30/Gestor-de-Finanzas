@@ -7,9 +7,11 @@ import com.example.GestorFinanzas.Ingresos.Add.Domain.Services.AddIngresoService
 import com.example.GestorFinanzas.Ingresos.Consult.Domain.Services.ConsultIngresoService;
 import com.example.GestorFinanzas.Ingresos.Modify.Domain.Services.ModifyIngresoService;
 import com.example.GestorFinanzas.Ingresos.Delete.Domain.Services.DeleteIngresoService;
+import com.example.GestorFinanzas.Ingresos.Files.Domian.Services.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +35,9 @@ public class IngresoViewController {
     @Autowired
     private DeleteIngresoService deleteIngresoService;
 
+    @Autowired
+    private StorageService storageService; // Asegúrate de inyectar el StorageService
+
     @GetMapping
     public String listarIngresos(Model model) {
         List<Ingreso> ingresos = consultIngresoService.listarTodos();
@@ -55,8 +60,6 @@ public class IngresoViewController {
         return "ingresos/list";
     }
 
-
-
     @GetMapping("/add")
     public String mostrarFormularioNuevo(Model model) {
         Ingreso ingreso = new Ingreso();
@@ -67,7 +70,9 @@ public class IngresoViewController {
     }
 
     @PostMapping("/add")
-    public String procesarNuevoIngreso(@ModelAttribute Ingreso ingreso, RedirectAttributes redirectAttributes) {
+    public String procesarNuevoIngreso(@ModelAttribute Ingreso ingreso,
+                                       @RequestParam(value = "file", required = false) MultipartFile file,
+                                       RedirectAttributes redirectAttributes) {
         try {
             System.out.println("💾 Guardando ingreso con fecha: " + ingreso.getFechaIngreso());
 
@@ -80,12 +85,28 @@ public class IngresoViewController {
                 ingreso.setFechaIngreso(LocalDateTime.now());
             }
 
+            // Guardar el ingreso primero
             addIngresoService.agregarIngreso(ingreso);
-            redirectAttributes.addFlashAttribute("success", "Ingreso agregado correctamente!");
+
+            // Procesar archivo si se proporcionó
+            if (file != null && !file.isEmpty()) {
+                try {
+                    storageService.store(file);
+                    redirectAttributes.addFlashAttribute("success",
+                            "Ingreso agregado y archivo subido correctamente!");
+                    System.out.println("📁 Archivo subido: " + file.getOriginalFilename());
+                } catch (Exception e) {
+                    redirectAttributes.addFlashAttribute("warning",
+                            "Ingreso guardado pero error al subir archivo: " + e.getMessage());
+                    System.out.println("⚠️ Error subiendo archivo: " + e.getMessage());
+                }
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Ingreso agregado correctamente!");
+            }
 
         } catch (Exception e) {
             System.out.println("❌ Error: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error al guardar ingreso: " + e.getMessage());
             return "redirect:/ingresos/add";
         }
         return "redirect:/ingresos";
@@ -105,10 +126,28 @@ public class IngresoViewController {
     }
 
     @PostMapping("/edit/{id}")
-    public String procesarEdicionIngreso(@PathVariable Long id, @ModelAttribute Ingreso ingreso, RedirectAttributes redirectAttributes) {
+    public String procesarEdicionIngreso(@PathVariable Long id,
+                                         @ModelAttribute Ingreso ingreso,
+                                         @RequestParam(value = "file", required = false) MultipartFile file,
+                                         RedirectAttributes redirectAttributes) {
         try {
             modifyIngresoService.modificarIngreso(id, ingreso);
-            redirectAttributes.addFlashAttribute("success", "Ingreso actualizado correctamente!");
+
+            // Procesar archivo si se proporcionó en la edición
+            if (file != null && !file.isEmpty()) {
+                try {
+                    storageService.store(file);
+                    redirectAttributes.addFlashAttribute("success",
+                            "Ingreso actualizado y archivo subido correctamente!");
+                    System.out.println("📁 Archivo subido en edición: " + file.getOriginalFilename());
+                } catch (Exception e) {
+                    redirectAttributes.addFlashAttribute("warning",
+                            "Ingreso actualizado pero error al subir archivo: " + e.getMessage());
+                }
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Ingreso actualizado correctamente!");
+            }
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
