@@ -3,7 +3,7 @@ package com.example.GestorFinanzas.Shared.Files.Infra.Config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@Component
+
 @ConfigurationProperties("storage")
 public class StorageProperties {
 
